@@ -34,7 +34,7 @@ void clearList(Person* table, long int totalCount) {
 }
 
 // Loading data from file dpt2020.csv
-void loadInfo(Person* table, long int* count) {
+void loadInfo(Person* table, long int* count, long int* nbrBirth) {
 	// opening the file
 	FILE* file = fopen("dpt2020.csv", "r");
 	// if file opening failed, exit the program with error message
@@ -52,6 +52,7 @@ void loadInfo(Person* table, long int* count) {
 		line[strlen(line) - 1] = '\0';
 		// inserting data into the list
 		table[*count] = getData(line);
+		*nbrBirth += table[*count].frequency;
 		(*count)++;
 	}
 	// closing the file
@@ -129,10 +130,10 @@ void statsSeparate(Person* table, long int totalCount, char* name) {
 		if (strcmp(table[i].fName, name) == 0) {
 			// check for male and female
 			if (strcmp(table[i].sex, "1") == 0) {
-				boys++;
+				boys+=table[i].frequency;
 			}
 			else {
-				girls++;
+				girls+=table[i].frequency;
 			}
 			// getting the first and last appearance of the name
 			if (strcmp(table[i].yearOfBirth, "XXXX") != 0 && min > atoi(table[i].yearOfBirth)) {
@@ -157,7 +158,7 @@ void stats(Person* table, long int totalCount, char* name) {
 	for (long int i = 0; i < totalCount; i++) {
 		// if name matched by the given name
 		if (strcmp(table[i].fName, name) == 0) {
-			count++;
+			count+=table[i].frequency;
 			// getting the first and last appearance of the name
 			if (strcmp(table[i].yearOfBirth, "XXXX") != 0 && min > atoi(table[i].yearOfBirth)) {
 				min = atoi(table[i].yearOfBirth);
@@ -184,7 +185,7 @@ void menu() {
 }
 
 // processing user inputs against menu
-void menuProcessing(Person* table, long int* totalCount) {
+void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 	int choice = 0;
 	char distinguish = '\0';
 	char name[26] = { 0 };
@@ -200,7 +201,7 @@ void menuProcessing(Person* table, long int* totalCount) {
 			// display number of births for 1
 			else if (choice == 1) {
 				// number of births
-				printf("The file covers %ld births.\n", *totalCount);
+				printf("The file covers %ld births.\n", *nbrBirth);
 			}
 			// display numbe of first names on 2
 			else if (choice == 2) {
@@ -253,11 +254,12 @@ void menuProcessing(Person* table, long int* totalCount) {
 int main() {
 	// tracking the total count of persons
 	long int totalCount = 0;
+	long int nbrBirth = 0;
 	Person* table = (Person*)calloc(MAX_SIZE, sizeof(Person));
 	// loading data from file
-	loadInfo(table, &totalCount);
+	loadInfo(table, &totalCount, &nbrBirth);
 	// processing user inputs against menu
-	menuProcessing(table, &totalCount);
+	menuProcessing(table, &totalCount, &nbrBirth);
 	// clearing the dynamically allocated memory to the list
 	clearList(table, totalCount);
 }
