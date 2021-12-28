@@ -15,6 +15,11 @@ typedef struct person {
 	int frequency;
 } Person;
 
+void clearStdin(){
+	scanf("%*[^\n]");
+	scanf("%*c");
+}
+
 // extracting persons data from readed line from file
 Person getData(char* line) {
 	Person p;
@@ -194,6 +199,7 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 		printf("What do you want to display? (0 for the menu) > ");
 		// input choice from the user
 		if (scanf("%d", &choice)) {
+			clearStdin();
 			// display menu for 0
 			if (choice == 0) {
 				menu();
@@ -217,6 +223,7 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 				else {
 					fNames(table, *totalCount);
 				}
+				clearStdin();
 			}
 			// display stats for a given first name
 			else if (choice == 3) {
@@ -224,7 +231,13 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 				// input first name from the user
 				printf("Enter firstname: ");
 				scanf("%s", name);
-				getc(stdin);
+				//getc(stdin);
+				for (int i = 0; name[i]!='\0'; i++){
+					if (name[i] >= 'a' && name[i] <= 'z'){
+						name[i] -= 32;
+					}
+				}
+				clearStdin();
 				printf("Do you want to distinguish the gender (Y/N) > ");
 				scanf("%c", &distinguish);
 				// if user wants to distiguish the gender
@@ -235,6 +248,7 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 				else {
 					stats(table, *totalCount, name);
 				}
+				clearStdin();
 			}
 			// exiting the program for 4
 			else if (choice == 4) {
@@ -247,6 +261,7 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 		}
 		else {
 			printf("Invalid choice. Enter again...\n");
+			clearStdin();
 		}
 	} while (choice != 4);
 }
