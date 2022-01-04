@@ -2,6 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<ctype.h>
 
 // Max size of the table
 #define MAX_SIZE 4000000
@@ -11,7 +12,6 @@ typedef struct person {
 	char sex[2];
 	char fName[26];
 	char yearOfBirth[5];
-	char dptOfBirth[3];
 	int frequency;
 } Person;
 
@@ -27,7 +27,7 @@ Person getData(char* line) {
 	strcpy(p.sex, strtok(line, ";"));
 	strcpy(p.fName, strtok(NULL, ";"));
 	strcpy(p.yearOfBirth, strtok(NULL, ";"));
-	strcpy(p.dptOfBirth, strtok(NULL, ";"));
+	strtok(NULL, ";");
 	p.frequency = atoi(strtok(NULL, ";"));
 	// returning the person object
 	return p;
@@ -39,9 +39,9 @@ void clearList(Person* table, long int totalCount) {
 }
 
 // Loading data from file dpt2020.csv
-void loadInfo(Person* table, long int* count, long int* nbrBirth) {
+void loadInfo(Person* table, long int* count, long int* nbrBirth, char fileName[]) {
 	// opening the file
-	FILE* file = fopen("dpt2020.csv", "r");
+	FILE* file = fopen(fileName, "r");
 	// if file opening failed, exit the program with error message
 	if (!file) {
 		printf("Unable to open file...\n");
@@ -57,6 +57,7 @@ void loadInfo(Person* table, long int* count, long int* nbrBirth) {
 		line[strlen(line) - 1] = '\0';
 		// inserting data into the list
 		table[*count] = getData(line);
+		// count number of birth
 		*nbrBirth += table[*count].frequency;
 		(*count)++;
 	}
@@ -129,6 +130,7 @@ void statsSeparate(Person* table, long int totalCount, char* name) {
 	int boys = 0, girls = 0;
 	int min = 2020;
 	int max = 1900;
+	int change = 0;
 
 	for (long int i = 0; i < totalCount; i++) {
 		// if name matched by the given name
@@ -143,23 +145,29 @@ void statsSeparate(Person* table, long int totalCount, char* name) {
 			// getting the first and last appearance of the name
 			if (strcmp(table[i].yearOfBirth, "XXXX") != 0 && min > atoi(table[i].yearOfBirth)) {
 				min = atoi(table[i].yearOfBirth);
+				change = 1;
 			}
 			if (strcmp(table[i].yearOfBirth, "XXXX") != 0 && max < atoi(table[i].yearOfBirth)) {
 				max = atoi(table[i].yearOfBirth);
+				change = 1;
 			}
 		}
 	}
 	// printing the results
 	printf("The first name %s was given to %d boys and %d girls.\n", name, boys, girls);
-	printf("Year of first appearance %d.\n", min);
-	printf("Year of last appearance %d.\n", max);
+	switch (change){
+		case 0 : printf("We don't know the year of first and last appearance.\n");break;
+		case 1 : printf("Year of first appearance %d.\n", min);printf("Year of last appearance %d.\n", max);break;
+	}
 }
 
-// generating statistics by distinguishing the gender
+// generating statistics without distinguishing the gender
 void stats(Person* table, long int totalCount, char* name) {
 	int count = 0;
 	int max = 1900;
 	int min = 2020;
+	int change = 0;
+
 	for (long int i = 0; i < totalCount; i++) {
 		// if name matched by the given name
 		if (strcmp(table[i].fName, name) == 0) {
@@ -167,16 +175,20 @@ void stats(Person* table, long int totalCount, char* name) {
 			// getting the first and last appearance of the name
 			if (strcmp(table[i].yearOfBirth, "XXXX") != 0 && min > atoi(table[i].yearOfBirth)) {
 				min = atoi(table[i].yearOfBirth);
+				change = 1;
 			}
 			if (strcmp(table[i].yearOfBirth, "XXXX") != 0 && max < atoi(table[i].yearOfBirth)) {
 				max = atoi(table[i].yearOfBirth);
+				change = 1;
 			}
 		}
 	}
 	// printing the results
 	printf("The first name %s was given to %d children.\n", name, count);
-	printf("Year of first appearance %d.\n", min);
-	printf("Year of last appearance %d.\n", max);
+	switch(change){
+		case 0 : printf("We don't know the year of first and last appearance.\n");break;
+		case 1 : printf("Year of first appearance %d.\n", min);printf("Year of last appearance %d.\n", max);break;
+	}
 
 }
 
@@ -212,13 +224,15 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 			// display numbe of first names on 2
 			else if (choice == 2) {
 				// Number of first names
-				getc(stdin);
+				// getc(stdin);
 				printf("Do you want to distinguish the gender (Y/N) > ");
 				scanf("%c", &distinguish);
+
 				// if user wants to distiguish the gender
 				if (distinguish == 'Y' || distinguish == 'y') {
 					fnamesSeparate(table, *totalCount);
 				}
+
 				// if user doesn't wants to distiguish the gender
 				else {
 					fNames(table, *totalCount);
@@ -232,12 +246,12 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 				printf("Enter firstname: ");
 				scanf("%s", name);
 				//getc(stdin);
+
 				for (int i = 0; name[i]!='\0'; i++){
-					if (name[i] >= 'a' && name[i] <= 'z'){
-						name[i] -= 32;
-					}
+					name[i] = toupper(name[i]);
 				}
 				clearStdin();
+				
 				printf("Do you want to distinguish the gender (Y/N) > ");
 				scanf("%c", &distinguish);
 				// if user wants to distiguish the gender
@@ -266,15 +280,17 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 	} while (choice != 4);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	// tracking the total count of persons
 	long int totalCount = 0;
 	long int nbrBirth = 0;
 	Person* table = (Person*)calloc(MAX_SIZE, sizeof(Person));
 	// loading data from file
-	loadInfo(table, &totalCount, &nbrBirth);
+	loadInfo(table, &totalCount, &nbrBirth, argv[1]);
 	// processing user inputs against menu
 	menuProcessing(table, &totalCount, &nbrBirth);
 	// clearing the dynamically allocated memory to the list
 	clearList(table, totalCount);
+
+	return 0;
 }
