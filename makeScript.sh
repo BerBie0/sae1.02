@@ -2,6 +2,6 @@
 
 echo "create 1 file : 'test'"
 echo "execute with './test'"
-gcc -o test test.c
+gcc test.c -o test
 chmod +x test
-./test
+./test "dpt2020.csv"

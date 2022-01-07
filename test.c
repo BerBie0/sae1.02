@@ -68,7 +68,7 @@ void loadInfo(Person* table, long int* count, long int* nbrBirth, char fileName[
 }
 
 // counting the first names by distinguishing the gender
-void fnamesSeparate(Person* table, long int totalCount) {
+void fnamesSeparate(Person* table, long int totalCount, long int totNames[]) {
 	long int boys = 0, girls = 0;
 	char sex[2] = { 0 };
 	char n[26] = { 0 };
@@ -87,8 +87,9 @@ void fnamesSeparate(Person* table, long int totalCount) {
 		}
 	}
 
-	// display results
-	printf("The file covers %ld male names and %ld female names.\n", boys, girls);
+	// storing results
+	totNames[1] = boys;
+	totNames[2] = girls;
 }
 
 // check if the name exists more than once.
@@ -103,7 +104,7 @@ int checkDistinct(Person* table, long int totalCount, char* name) {
 }
 
 // counting the first names without distinguishing the gender
-void fNames(Person* table, long int totalCount) {
+void fNames(Person* table, long int totalCount, long int totNames[]) {
 	long int names = 0;
 	char n[26] = { 0 };
 	Person* temp = (Person*)calloc(totalCount, sizeof(Person));
@@ -118,8 +119,8 @@ void fNames(Person* table, long int totalCount) {
 			i++;
 		}
 	}
-	// display results
-	printf("The file contains %ld first names.\n", names);
+	// storing result
+	totNames[0] = names;
 
 	// clearing the distinct list dynamic memory
 	clearList(temp, names);
@@ -202,7 +203,7 @@ void menu() {
 }
 
 // processing user inputs against menu
-void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
+void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth, long int totNames[]) {
 	int choice = 0;
 	char distinguish = '\0';
 	char name[26] = { 0 };
@@ -230,12 +231,12 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 
 				// if user wants to distiguish the gender
 				if (distinguish == 'Y' || distinguish == 'y') {
-					fnamesSeparate(table, *totalCount);
+					printf("The file covers %ld male names and %ld female names.\n", totNames[1], totNames[2]);
 				}
 
 				// if user doesn't wants to distiguish the gender
 				else {
-					fNames(table, *totalCount);
+					printf("The file covers %ld names.\n", totNames[0]);
 				}
 				clearStdin();
 			}
@@ -282,13 +283,16 @@ void menuProcessing(Person* table, long int* totalCount, long int* nbrBirth) {
 
 int main(int argc, char *argv[]) {
 	// tracking the total count of persons
-	long int totalCount = 0;
-	long int nbrBirth = 0;
+	long int totalCount = 0, nbrBirth = 0;
+	// table to store number of names
+	long int totNames[3];
 	Person* table = (Person*)calloc(MAX_SIZE, sizeof(Person));
 	// loading data from file
 	loadInfo(table, &totalCount, &nbrBirth, argv[1]);
+	fNames(table, totalCount, totNames);
+	fnamesSeparate(table, totalCount, totNames);
 	// processing user inputs against menu
-	menuProcessing(table, &totalCount, &nbrBirth);
+	menuProcessing(table, &totalCount, &nbrBirth, totNames);
 	// clearing the dynamically allocated memory to the list
 	clearList(table, totalCount);
 
