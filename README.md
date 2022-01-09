@@ -1,2 +1,7 @@
 # sae1.02
-# test alex
+> Rouillon Tom & Welty Alexandre
+
+## executer le script 'makeScript.sh
+```
+sudo ./makeScript.sh
+```
