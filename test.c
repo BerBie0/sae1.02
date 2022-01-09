@@ -296,5 +296,8 @@ int main(int argc, char *argv[]) {
 	// clearing the dynamically allocated memory to the list
 	clearList(table, totalCount);
 
+	// use gcc NaissMult.c -o NaissMult to compile
+	// and ./NaissMult "dpt2020.csv" to execute
+	
 	return 0;
 }
